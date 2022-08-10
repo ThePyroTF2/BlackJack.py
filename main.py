@@ -27,9 +27,9 @@ class Deck:
     def draw(self):
         if len(self.deck) == 0:
             self.repop()
-
+        card = self.deck[0]
         self.deck.remove(self.deck[0])
-        return self.deck[0]
+        return card
 
     def repop(self):
         self.deck = []
@@ -98,6 +98,7 @@ if pStatuses[0] != "Lost":
         print(f"Player {i+1}'s hand:")
         printHand(pHands[i])
         pHandValues[i] = sum([card.value for card in pHands[i]])
+        print(f"Value: {pHandValues[i]}")
         if pHandValues[i] == 21:
             print(f"Blackjack! Player {i+1} wins.")
             pStatuses[i] = "Won"
@@ -121,13 +122,13 @@ for i in range(nPlayers):
                 pStatuses[i] = "Won"
             elif pHandValues[i] > 21:
                 bogoSort(pHands[i])
-                if pHands[i][pHands[i].len() - 1].value == 11:
+                if pHands[i][len(pHands[i]) - 1].value == 11:
                     pHands[i][pHands[i].len() - 1].value = 1
                     pHandValues[i] = sum([card.value for card in pHands[i]])
-                    if pHandValues[i] > 21:
-                        print(f"Value: {pHandValues[i]}\nBust")
-                        pStatuses[i] = "Lost"
-                        break
+                if pHandValues[i] > 21:
+                    print(f"Value: {pHandValues[i]}\nBust")
+                    pStatuses[i] = "Lost"
+                    break
                     print(f"Value: {pHandValues[i]}")
             else: print(f"Value: {pHandValues[i]}")
         elif choice == 2:
