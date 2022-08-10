@@ -182,3 +182,4 @@ else:
             print(f"Value: {dHandValue}")
             pStatuses[i] = "Won" if pHandValues[i] > dHandValue else "Push" if pHandValues[i] == dHandValue else "Lost"
             print("Dealer wins" if pStatuses[i] == "Lost" else "Push" if pStatuses[i] == "Push" else f"Player {i+1} wins")
+            input("Press enter to quit")
