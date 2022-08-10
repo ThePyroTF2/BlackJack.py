@@ -6,7 +6,7 @@ class Card:
     def __init__(self, suit, rank):
         self.suit = "Hearts" if suit == 1 else "Diamonds" if suit == 2 else "Clubs" if suit == 3 else "Spades"
         self.rank = "Ace" if rank == 1 else rank if rank < 11 else "Jack" if rank == 11 else "Queen" if rank == 12 else "King"
-        self.value = 11 if self.rank == "Ace" else self.rank if self.rank < 11 else 10
+        self.value = 11 if self.rank == "Ace" else self.rank if rank < 11 else 10
 
     def __str__(self):
         return f"{self.rank} of {self.suit}"
@@ -84,12 +84,12 @@ print(dHand[0])
 if dHand[0].value == 11:
     print("Checking for blackjack...")
     if dHand[1].value > 9:
-        print("Dealer has blackjack! Everyone loses.")
+        print(f"{dHand[1]}\nDealer has blackjack! Everyone loses.")
         pStatuses = ["Lost" for i in range(nPlayers)]
 elif dHand[0].value > 9:
     print("Checking for blackjack...")
     if dHand[1].value == 11:
-        print("Dealer has blackjack! Everyone loses.")
+        print(f"{dHand[1]}\nDealer has blackjack! Everyone loses.")
         pStatuses = ["Lost" for i in range(nPlayers)]
 
 print()
