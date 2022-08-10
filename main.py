@@ -6,7 +6,7 @@ class Card:
     def __init__(self, suit, rank):
         self.suit = "Hearts" if suit == 1 else "Diamonds" if suit == 2 else "Clubs" if suit == 3 else "Spades"
         self.rank = "Ace" if rank == 1 else rank if rank < 11 else "Jack" if rank == 11 else "Queen" if rank == 12 else "King"
-        self.value = 11 if rank == "Ace" else rank if rank < 11 else 10
+        self.value = 11 if self.rank == "Ace" else self.rank if self.rank < 11 else 10
 
     def __str__(self):
         return f"{self.rank} of {self.suit}"
@@ -27,6 +27,7 @@ class Deck:
     def draw(self):
         if len(self.deck) == 0:
             self.repop()
+
         card = self.deck[0]
         self.deck.remove(self.deck[0])
         return card
