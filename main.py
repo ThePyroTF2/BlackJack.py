@@ -64,10 +64,27 @@ def isSorted(data):
             return False
     return True
 
+def checkDealerBlackjack(hand):
+    if dHand[0].value == 11:
+        print("Checking for blackjack...")
+        if dHand[1].value > 9:
+            return True
+        else:
+            print("No Blackjack")
+    elif dHand[0].value > 9:
+        print("Checking for blackjack...")
+        if dHand[1].value == 11:
+            return True
+        else:
+            print("No BlackJack")
+    else:
+        return False
+
 deck = Deck()
 deck.shuffle()
 
 nPlayers = int(input("Number of players: "))
+clear()
 
 dHand = []
 pHands = [[] for i in range(nPlayers)]
@@ -79,18 +96,13 @@ for n in range(2):
     for i in range(nPlayers):
         pHands[i].append(deck.draw())
 
+
 print("Dealer's hand: ")
 print(dHand[0])
-if dHand[0].value == 11:
-    print("Checking for blackjack...")
-    if dHand[1].value > 9:
-        print(f"{dHand[1]}\nDealer has blackjack! Everyone loses.")
-        pStatuses = ["Lost" for i in range(nPlayers)]
-elif dHand[0].value > 9:
-    print("Checking for blackjack...")
-    if dHand[1].value == 11:
-        print(f"{dHand[1]}\nDealer has blackjack! Everyone loses.")
-        pStatuses = ["Lost" for i in range(nPlayers)]
+if checkDealerBlackjack(dHand):
+    print(f"{dHand[1]}\nDealer has blackjack! Everyone loses.")
+    pStatuses = ["Lost" for i in range(nPlayers)]
+
 
 print()
 
@@ -105,10 +117,12 @@ if pStatuses[0] != "Lost":
             pStatuses[i] = "Won"
         print()
     input("Press enter to continue...")
-    clear()
 
 for i in range(nPlayers):
-    print(f"Player {i+1}'s turn.")
+    clear()
+    print(f"Player {i+1}'s turn.\nHand:")
+    printHand(pHands[i])
+    print(f"Value: {pHandValues[i]}")
     while pStatuses[i] == "Playing":
         choice = int(input("1. Hit\n2. Stand\n"))
         clear()
@@ -119,18 +133,52 @@ for i in range(nPlayers):
             print()
             pHandValues[i] = sum([card.value for card in pHands[i]])
             if pHandValues[i] == 21:
-                print(f"Value: 21\nWin")
-                pStatuses[i] = "Won"
+                print(f"Value: 21\n")
+                pStatuses[i] = "Done"
             elif pHandValues[i] > 21:
                 bogoSort(pHands[i])
                 if pHands[i][len(pHands[i]) - 1].value == 11:
-                    pHands[i][pHands[i].len() - 1].value = 1
+                    pHands[i][(pHands[i]) - 1].value = 1
                     pHandValues[i] = sum([card.value for card in pHands[i]])
                 if pHandValues[i] > 21:
                     print(f"Value: {pHandValues[i]}\nBust")
                     pStatuses[i] = "Lost"
+                    input("Press enter to continue...")
                     break
-                    print(f"Value: {pHandValues[i]}")
             else: print(f"Value: {pHandValues[i]}")
+            input("Press enter to continue...")
         elif choice == 2:
             pStatuses[i] = "Done"
+dHandValue = sum([card.value for card in dHand])
+
+print("Dealer's turn.\nHand:")
+printHand(dHand)
+print(f"Value: {dHandValue}")
+input("Press enter to continue...")
+while dHandValue < 16:
+    clear()
+    dHand.append(deck.draw())
+    print("Dealer's turn.\nHand:")
+    printHand(dHand)
+    dHandValue = sum([card.value for card in dHand])
+    bogoSort(dHand)
+    if dHandValue > 21 and dHand[len(dHand) - 1].value == 11:
+        dHand[len(dHand) - 1].value = 1
+        dHandValue = sum([card.value for card in dHand])
+    print(f"Value: {dHandValue}")
+    input("Press enter to continue...")
+if dHandValue > 21:
+    print("Dealer busts. Everyone wins.")
+    pStatuses = ["Won" if pStatuses[i] != "Lost" else "Lost" for i in range(nPlayers)]
+else:
+    for i in range(nPlayers):
+        if pStatuses[i] == "Done":
+            clear()
+            print(f"Player {i+1}\nHand:")
+            printHand(pHands[i])
+            print(f"Value: {pHandValues[i]}")
+            print("Dealer's Hand:")
+            printHand(dHand)
+            print(f"Value: {dHandValue}")
+            pStatuses[i] = "Won" if pHandValues[i] > dHandValue else "Push" if pHandValues[i] == dHandValue else "Lost"
+            print("Dealer wins" if pStatuses[i] == "Lost" else "Push" if pStatuses[i] == "Push" else f"Player {i+1} wins")
