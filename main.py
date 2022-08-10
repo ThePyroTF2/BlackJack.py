@@ -52,6 +52,17 @@ def printHand(hand):
     for card in hand:
         print(card)
 
+def bogoSort(data):
+    while not isSorted(data):
+        random.shuffle(data)
+    return data
+
+def isSorted(data):
+    for i in range(len(data) - 1):
+        if int(data[i]) > int(data[i + 1]):
+            return False
+    return True
+
 deck = Deck()
 deck.shuffle()
 
@@ -97,7 +108,7 @@ if pStatuses[0] != "Lost":
 for i in range(nPlayers):
     print(f"Player {i+1}'s turn.")
     while pStatuses[i] == "Playing":
-        choice = int(input("1. Hit\n2. Stand"))
+        choice = int(input("1. Hit\n2. Stand\n"))
         clear()
         if choice == 1:
             pHands[i].append(deck.draw())
@@ -106,11 +117,18 @@ for i in range(nPlayers):
             print()
             pHandValues[i] = sum([card.value for card in pHands[i]])
             if pHandValues[i] == 21:
-                print("Win")
+                print(f"Value: 21\nWin")
                 pStatuses[i] = "Won"
             elif pHandValues[i] > 21:
-                pHands[i].sort()
+                bogoSort(pHands[i])
                 if pHands[i][pHands[i].len() - 1].value == 11:
                     pHands[i][pHands[i].len() - 1].value = 1
-                print("Bust")
-                pStatuses[i] = "Lost"
+                    pHandValues[i] = sum([card.value for card in pHands[i]])
+                    if pHandValues[i] > 21:
+                        print(f"Value: {pHandValues[i]}\nBust")
+                        pStatuses[i] = "Lost"
+                        break
+                    print(f"Value: {pHandValues[i]}")
+            else: print(f"Value: {pHandValues[i]}")
+        elif choice == 2:
+            pStatuses[i] = "Done"
