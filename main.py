@@ -49,6 +49,7 @@ nPlayers = int(input("Number of players: "))
 
 dHand = []
 pHands = [[] for i in range(nPlayers)]
+pStatuses = ["Playing" for i in range(nPlayers)]
 
 for n in range(2):
     dHand.append(deck.draw())
@@ -72,5 +73,6 @@ for i in range(nPlayers):
     print(f"Player {i+1}'s hand:")
     for card in pHands[i]:
         print(card)
+    if pHands[i][0].rank == 1 and pHands[i][0].rank + pHands[i][1].rank > 10: print(f"Blackjack! Player {i+1} wins.")
     print()
 
