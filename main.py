@@ -48,6 +48,10 @@ class Deck:
         for card in self.deck:
             print(card)
 
+def printHand(hand):
+    for card in hand:
+        print(card)
+
 deck = Deck()
 deck.shuffle()
 
@@ -81,8 +85,7 @@ print()
 if pStatuses[0] != "Lost":
     for i in range(nPlayers):
         print(f"Player {i+1}'s hand:")
-        for card in pHands[i]:
-            print(card)
+        printHand(pHands[i])
         pHandValues[i] = sum([card.value for card in pHands[i]])
         if pHandValues[i] == 21:
             print(f"Blackjack! Player {i+1} wins.")
@@ -99,8 +102,7 @@ for i in range(nPlayers):
         if choice == 1:
             pHands[i].append(deck.draw())
             print("Hand:")
-            for card in pHands[i]:
-                print(f"{card}")
+            printHand(pHands[i])
             print()
             pHandValues[i] = sum([card.value for card in pHands[i]])
             if pHandValues[i] == 21:
