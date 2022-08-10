@@ -56,8 +56,15 @@ for n in range(2):
         pHands[i].append(deck.draw())
 
 print("Dealer's hand: ")
-for card in dHand:
-    print(card)
+print(dHand[0])
+if dHand[0].rank == 1:
+    print("Checking for blackjack...")
+    if dHand[1].rank > 9:
+        print("Dealer has blackjack! Everyone loses.")
+elif dHand[0].rank > 9:
+    print("Checking for blackjack...")
+    if dHand[1].rank == 1:
+        print("Dealer has blackjack! Everyone loses.")
 
 print()
 
@@ -66,3 +73,4 @@ for i in range(nPlayers):
     for card in pHands[i]:
         print(card)
     print()
+
