@@ -151,7 +151,7 @@ def playStandardHand(players, i):
         print(f"Value: {players[i].hand_values[0]}")
 
     while players[i].statuses[0] == "Playing":
-        choice = int(input("1. Hit\n2. Stand\n" + ("3. Split\n" if players[i].hands[len(players[i].hands) - 2] == "Split" else "") + ("4. Double Down\n" if ((players[i].hands[len(players[i].hands) - 1] == "Split") and (players[i].hands[len(players[i].hands) - 1] == "Double Down")) else "3. Double down" if players[i].hands[len(players[i].hands) - 1] == "Double Down" else "")))
+        choice = int(input("1. Hit\n2. Stand\n" + ("3. Split\n" if players[i].hands[len(players[i].hands) - 1] == "Split" else "") + ("4. Double Down\n" if ((players[i].hands[len(players[i].hands) - 2] == "Split") and (players[i].hands[len(players[i].hands) - 1] == "Double Down")) else "3. Double down" if players[i].hands[len(players[i].hands) - 1] == "Double Down" else "")))
         clear()
 
         if choice == 1:
@@ -185,8 +185,8 @@ def playStandardHand(players, i):
         
         elif choice == 3 and players[i].hands[len(players[i].hands) - 1] == "Split":
             players[i].hands.remove("Split")
-            players[i].hands[0].remove(players[i].hands[0][0])
             players[i].hands.append([players[i].hands[0][0]])
+            players[i].hands[0].remove(players[i].hands[0][0])
             players[i].hand_values[0] = sum([card.value for card in players[i].hands[0]])
             players[i].hand_values[1] = sum([card.value for card in players[i].hands[1]])
             players[i].bet += players[i].bet
@@ -198,12 +198,14 @@ def playStandardHand(players, i):
             players[i].hands.remove("Double Down")
             players[i].hands[0].append(deck.draw())
             players[i].statuses[0] = "Done"
+            players[i].hand_values[0] = sum([card.value for card in players[i].hands[0]])
             clear()
         
         elif choice == 4 and players[i].hands[len(players[i].hands) - 2] == "Double Down":
             players[i].hands.remove("Double Down")
             players[i].hands[0].append(deck.draw())
             players[i].statuses[0] = "Done"
+            players[i].hand_values[0] = sum([card.value for card in players[i].hands[0]])
             clear()
 
 def playSplitHand(players, i):
@@ -299,7 +301,7 @@ def betReturn(players):
     for i in range(len([players[x].hands[y] for x in range(len(players)) for y in range(len(players[x].hands))])):
         if i < nPlayers:
             players[i].bank += players[i].bet * (2 if players[i].statuses[0] == "Won" else 0 if players[i].statuses[0] == "Lost" else 1)
-        else:
+        elif i >= nPlayers:
             players[(i - nPlayers) + 1].bank += players[(i - nPlayers) + 1].bet * (2 if players[(i - nPlayers) + 1].statuses[1] == "Won" else 0 if players[(i - nPlayers) + 1].statuses[1] == "Lost" else 1)
 
 def gameLoop(deck, nPlayers, players, dealer):
