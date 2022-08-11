@@ -101,193 +101,150 @@ def checkDealerBlackjack(hand):
     else:
         return False
 
-deck = Deck()
-deck.shuffle()
-
-nPlayers = int(input("Number of players: "))
-players = [Player() for i in range(nPlayers)]
-dealer = Dealer()
-clear()
-running = True
-while running == True:
-    # Deal player cards
-    for player in players:
-        player.clear()
-    dealer.clear()
-    # Get bets
-    for player in players:
-        for i in range(len(players)):
-            player.bet = int(input(f"Player {i+1} bet ({player.bank} in bank): "))
-            player.bank -= player.bet
-    clear()
-
-    # Deal dealer cards
-    for i in range(2):
+def dealCards(players, dealer, deck, handSize):
+    for i in range(handSize):
         dealer.hand.append(deck.draw())
         for player in players:
             player.hands[0].append(deck.draw())
 
-    # Check for blackjack
-    print("Dealer's hand: ")
-    print(dealer.hand[0])
-    if checkDealerBlackjack(dealer.hand):
-        print(f"{dealer.hand[1]}\nDealer has blackjack! Everyone loses.")
-        for player in players:
-            player.statuses[0] = "Lost"
+def initPlayerHands(nPlayers, players):
+    for i in range(nPlayers):
+        print(f"Player {i+1}'s hand:")
+        printHand(players[i].hands[0])
 
+        players[i].hand_values[0] = sum([card.value for card in players[i].hands[0]])
 
-    print()
+        if players[i].hand_values[0] == 22:
+            bogoSort(players[i].hands[0])
 
-    # Show player hands
-    if players[0].statuses[0] != "Lost":
-        for i in range(nPlayers):
-            print(f"Player {i+1}'s hand:")
+            if players[i].hands[0][len(players[i].hands[0]) - 1].value == 11:
+                players[i].hands[0][len(players[i].hands[0]) - 1].value = 1
+                players[i].hand_values[0] = sum([card.value for card in players[i].hands[0]])
+
+        print(f"Value: {players[i].hand_values[0]}")
+
+        if players[i].hands[0][1].value == 1:
+            players[i].hands[0][1].value = 11
+
+        # Check for player blackjack
+        if players[i].hand_values[0] == 21:
+            print(f"Blackjack! Player {i+1} wins.")
+            players[i].statuses[0] = "Blackjack"
+            players[i].bank += players[i].bet * 2.5
+
+        # Check for double-down
+        if 9 <= players[i].hand_values[0] <= 11:
+            players[i].hands.append("Double Down")
+
+        # Check for doubles
+        if players[i].hands[0][0].value == players[i].hands[0][1].value:
+            players[i].hands.append("Split")
+        print()
+
+    input("Press enter to continue...")
+
+def playStandardHand(players, i):
+    clear()
+    if players[i].statuses[0] == "Playing":
+        print(f"Player {i+1}'s turn.\nHand:")
+        printHand(players[i].hands[0])
+        print(f"Value: {players[i].hand_values[0]}")
+
+    while players[i].statuses[0] == "Playing":
+        choice = int(input("1. Hit\n2. Stand\n" + ("3. Split\n" if players[i].hands[len(players[i].hands) - 2] == "Split" else "") + ("4. Double Down\n" if ((players[i].hands[len(players[i].hands) - 1] == "Split") and (players[i].hands[len(players[i].hands) - 1] == "Double Down")) else "3. Double down" if players[i].hands[len(players[i].hands) - 1] == "Double Down" else "")))
+        clear()
+
+        if choice == 1:
+            players[i].hands[0].append(deck.draw())
+            print("Hand:")
             printHand(players[i].hands[0])
-
+            print()
             players[i].hand_values[0] = sum([card.value for card in players[i].hands[0]])
 
-            # Check for double aces and adjust hand value
-            if players[i].hand_values == 22:
+            if players[i].hand_values[0] == 21:
+                print(f"Value: 21\n")
+                players[i].statuses[0] = "Done"
+            elif players[i].hand_values[0] > 21:
                 bogoSort(players[i].hands[0])
 
                 if players[i].hands[0][len(players[i].hands[0]) - 1].value == 11:
                     players[i].hands[0][len(players[i].hands[0]) - 1].value = 1
                     players[i].hand_values[0] = sum([card.value for card in players[i].hands[0]])
 
+                if players[i].hand_values[0] > 21:
+                    print(f"Value: {players[i].hand_values[0]}\nBust")
+                    players[i].statuses[0] = "Lost"
+                    input("Press enter to continue...")
+                    break
+
             print(f"Value: {players[i].hand_values[0]}")
+            input("Press enter to continue...")
 
-            if players[i].hands[0][1].value == 1:
-                players[i].hands[0][1].value = 11
+        elif choice == 2:
+            players[i].statuses[0] = "Done"
+        
+        elif choice == 3 and players[i].hands[len(players[i].hands) - 1] == "Split":
+            players[i].hands.remove("Split")
+            players[i].hands[0].remove(players[i].hands[0][0])
+            players[i].hands.append([players[i].hands[0][0]])
+            players[i].hand_values[0] = sum([card.value for card in players[i].hands[0]])
+            players[i].hand_values[1] = sum([card.value for card in players[i].hands[1]])
+            players[i].bet += players[i].bet
+            players[i].bank -= players[i].bet
+            players[i].statuses[0] = "Split"
+            clear()
+        
+        elif choice == 3 and players[i].hands[len(players[i].hands) - 1] == "Double Down":
+            players[i].hands.remove("Double Down")
+            players[i].hands[0].append(deck.draw())
+            clear()
+        
+        elif choice == 4 and players[i].hands[len(players[i].hands) - 2] == "Double Down":
+            players[i].hands.remove("Double Down")
+            players[i].hands[0].append(deck.draw())
+            clear()
 
-            # Check for player blackjack
-            if players[i].hand_values[0] == 21:
-                print(f"Blackjack! Player {i+1} wins.")
-                players[i].statuses[0] = "Blackjack"
-                players[i].bank += players[i].bet * 2.5
+def playSplitHand(players, i):
+    for j in range(2):
+        print(f"Player {i+1}'s {'first' if j == 0 else 'second'} hand:")
+        printHand(players[i].hands[j])
+        print(f"Value: {players[i].hand_values[j]}")
 
-            # Check for double-down
-            if 9 <= players[i].hand_values[0] <= 11:
-                players[i].hands.append("Double Down")
-
-            # Check for doubles
-            if players[i].hands[0][0].value == players[i].hands[0][1].value:
-                players[i].hands.append("Split")
-            print()
-
-        input("Press enter to continue...")
-
-    # Standard hand play
-    for i in range(nPlayers):
-        clear()
-        if players[i].statuses[0] == "Playing":
-            print(f"Player {i+1}'s turn.\nHand:")
-            printHand(players[i].hands[0])
-            print(f"Value: {players[i].hand_values[0]}")
-
-        while players[i].statuses[0] == "Playing":
-            choice = int(input("1. Hit\n2. Stand\n" + ("3. Split\n" if players[i].hands[len(players[i].hands - 1)] == "Split" else "") + ("4. Double Down\n" if ((players[i].hands[len(players[i].hands) - 1] == "Split") and (players[i].hands[len(players[i].hands) - 1] == "Double Down")) else "3. Double down" if players[i].hands[len(players[i].hands - 1)] == "Double Down" else "")))
+        while players[i].statuses[0] == "Split":
+            choice = int(input("1. Hit\n2. Stand\n"))
             clear()
 
             if choice == 1:
-                players[i].hands[0].append(deck.draw())
+                players[i].hands[j].append(deck.draw())
                 print("Hand:")
-                printHand(players[i].hands[0])
+                printHand(players[i].hands[j])
                 print()
-                players[i].hand_values[0] = sum([card.value for card in players[i].hands[0]])
+                players[i].hand_values[j] = sum([card.value for card in players[i].hands[j]])
 
-                if players[i].hand_values[0] == 21:
+                if players[i].hand_values[j] == 21:
                     print(f"Value: 21\n")
-                    players[i].statuses[0] = "Done"
-                elif players[i].hand_values[0] > 21:
-                    bogoSort(players[i].hands[0])
+                    players[i].statuses.append("Done")
+                elif players[i].hand_values[j] > 21:
+                    bogoSort(players[i].hands[j])
 
-                    if players[i].hands[0][len(players[i].hands[0]) - 1].value == 11:
-                        players[i].hands[0][len(players[i].hands[0]) - 1].value = 1
-                        players[i].hand_values[0] = sum([card.value for card in players[i].hands[0]])
+                    if players[i].hands[j][len(players[i].hands[j]) - 1].value == 11:
+                        players[i].hands[j][len(players[i].hands[j]) - 1].value = 1
+                        players[i].hand_values[j] = sum([card.value for card in players[i].hands[j]])
 
-                    if players[i].hand_values[0] > 21:
-                        print(f"Value: {players[i].hand_values[0]}\nBust")
-                        players[i].statuses[0] = "Lost"
+                    if players[i].hand_values[j] > 21:
+                        print(f"Value: {players[i].hand_values[j]}\nBust")
+                        players[i].statuses.append("Lost")
                         input("Press enter to continue...")
                         break
 
-                print(f"Value: {players[i].hand_values[0]}")
+                print(f"Value: {players[i].hand_values[j]}")
                 input("Press enter to continue...")
 
             elif choice == 2:
-                players[i].statuses[0] = "Done"
-            
-            elif choice == 3 and players[i].hands[len(players[i].hands) - 1] == "Split":
-                players[i].hands.remove("Split")
-                players[i].hands[0].remove(players[i].hands[0][0])
-                players[i].hands.append([players[i].hands[0][0]])
-                players[i].hand_values[0] = sum([card.value for card in players[i].hands[0]])
-                players[i].hand_values[1] = sum([card.value for card in players[i].hands[1]])
-                players[i].bet += players[i].bet
-                players[i].bank -= players[i].bet
-                players[i].statuses[0] = "Split"
-                clear()
-            
-            elif choice == 3 and players[i].hands[len(players[i].hands) - 1] == "Double Down":
-                players[i].hands.remove("Double Down")
-                players[i].hands[0].append(deck.draw())
-                clear()
-            
-            elif choice == 4 and players[i].hands[len(players[i].hands) - 2] == "Double Down":
-                players[i].hands.remove("Double Down")
-                players[i].hands[0].append(deck.draw())
-                clear()
-        
-        # Split hand play
-        if players[i].statuses[0] == "Split":
-            for j in range(2):
-                print(f"Player {i+1}'s {'first' if j == 0 else 'second'} hand:")
-                printHand(players[i].hands[j])
-                print(f"Value: {players[i].hand_values[j]}")
+                players[i].statuses.append("Done")
+                break
 
-                while players[i].statuses[0] == "Split":
-                    choice = int(input("1. Hit\n2. Stand\n"))
-                    clear()
-
-                    if choice == 1:
-                        players[i].hands[j].append(deck.draw())
-                        print("Hand:")
-                        printHand(players[i].hands[j])
-                        print()
-                        players[i].hand_values[j] = sum([card.value for card in players[i].hands[j]])
-
-                        if players[i].hand_values[j] == 21:
-                            print(f"Value: 21\n")
-                            players[i].statuses.append("Done")
-                        elif players[i].hand_values[j] > 21:
-                            bogoSort(players[i].hands[j])
-
-                            if players[i].hands[j][len(players[i].hands[j]) - 1].value == 11:
-                                players[i].hands[j][len(players[i].hands[j]) - 1].value = 1
-                                players[i].hand_values[j] = sum([card.value for card in players[i].hands[j]])
-
-                            if players[i].hand_values[j] > 21:
-                                print(f"Value: {players[i].hand_values[j]}\nBust")
-                                players[i].statuses.append("Lost")
-                                input("Press enter to continue...")
-                                break
-
-                        print(f"Value: {players[i].hand_values[j]}")
-                        input("Press enter to continue...")
-
-                    elif choice == 2:
-                        players[i].statuses.append("Done")
-                        break
-
-
-
-    dealer.hand_value = sum([card.value for card in dealer.hand])
-    print("Dealer's turn.\nHand:")
-    printHand(dealer.hand)
-    print(f"Value: {dealer.hand_value}")
-    input("Press enter to continue...")
-
-    # Dealer hand play
+def playDealerHand(dealer):
     while dealer.hand_value < 16:
         clear()
 
@@ -304,12 +261,12 @@ while running == True:
         print(f"Value: {dealer.hand_value}")
         input("Press enter to continue...")
 
+def winLoss(dealer, players):
     if dealer.hand_value > 21:
         print("Dealer busts")
         for player in players:
             for i in range(len(player.statuses)):
                 player.statuses[i] = "Push" if player.statuses[i] == "Lost" else "Won"
-    # Final win/loss check
     else:
         for i in range(len([players[x].hands[y] for x in range(len(players)) for y in range(len(players[x].hands))])):
             if i < nPlayers and players[i].statuses[0] == "Done":
@@ -336,12 +293,74 @@ while running == True:
                     players[(i - nPlayers) + 1].statuses[1] = "Won" if players[(i - nPlayers) + 1].hand_values[1] > dealer.hand_value else "Push" if players[(i - nPlayers) + 1].hand_values[1] == dealer.hand_value else "Lost"
                     print("Dealer wins" if players[(i - nPlayers) + 1].statuses[1] == "Lost" else "Push" if players[(i - nPlayers) + 1].statuses[1] == "Push" else f"Player {(i - nPlayers) + 1} wins")
 
-
-    
+def betReturn(players):
     for i in range(len([players[x].hands[y] for x in range(len(players)) for y in range(len(players[x].hands))])):
         if i < nPlayers:
             players[i].bank += players[i].bet * (2 if players[i].statuses[0] == "Won" else 0 if players[i].statuses[0] == "Lost" else 1)
         else:
             players[(i - nPlayers) + 1].bank += players[(i - nPlayers) + 1].bet * (2 if players[(i - nPlayers) + 1].statuses[1] == "Won" else 0 if players[(i - nPlayers) + 1].statuses[1] == "Lost" else 1)
-    running = False if int(input("1. Play again\n2. Exit\n")) == 2 else True
+
+def gameLoop(deck, nPlayers, players, dealer):
+    running = True
+    while running == True:
+        for player in players:
+            player.clear()
+        dealer.clear()
+        # Get bets
+        for player in players:
+            for i in range(len(players)):
+                player.bet = int(input(f"Player {i+1} bet ({player.bank} in bank): "))
+                player.bank -= player.bet
+        clear()
+
+        dealCards(players, dealer, deck, 2)
+
+        # Check for blackjack
+        print("Dealer's hand: ")
+        print(dealer.hand[0])
+        if checkDealerBlackjack(dealer.hand):
+            print(f"{dealer.hand[1]}\nDealer has blackjack! Everyone loses.")
+            for player in players:
+                player.statuses[0] = "Lost"
+            input("Press enter to continue...")
+
+        print()
+
+        if players[0].statuses[0] != "Lost":
+            initPlayerHands(nPlayers, players)
+
+        # Standard hand play
+        for i in range(nPlayers):
+            playStandardHand(players, i)
+            # Split hand play
+            if players[i].statuses[0] == "Split":
+                playSplitHand(players, i)
+
+
+
+        dealer.hand_value = sum([card.value for card in dealer.hand])
+        print("Dealer's turn.\nHand:")
+        printHand(dealer.hand)
+        print(f"Value: {dealer.hand_value}")
+        input("Press enter to continue...")
+
+        playDealerHand(dealer)
+
+        winLoss(dealer, players)
+
+        betReturn(players)
+
+        running = False if int(input("1. Play again\n2. Exit\n")) == 2 else True
+
+clear()
+deck = Deck()
+deck.shuffle()
+
+nPlayers = int(input("Number of players: "))
+players = [Player() for i in range(nPlayers)]
+dealer = Dealer()
+clear()
+
+gameLoop(deck, nPlayers, players, dealer)
+
 clear()
