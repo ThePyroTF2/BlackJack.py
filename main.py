@@ -110,22 +110,24 @@ dealer = Dealer()
 clear()
 running = True
 while running == True:
+    # Deal player cards
     for player in players:
         player.clear()
     dealer.clear()
-
+    # Get bets
     for player in players:
         for i in range(len(players)):
             player.bet = int(input(f"Player {i+1} bet ({player.bank} in bank): "))
             player.bank -= player.bet
     clear()
 
+    # Deal dealer cards
     for i in range(2):
         dealer.hand.append(deck.draw())
         for player in players:
             player.hands[0].append(deck.draw())
 
-
+    # Check for blackjack
     print("Dealer's hand: ")
     print(dealer.hand[0])
     if checkDealerBlackjack(dealer.hand):
@@ -136,25 +138,41 @@ while running == True:
 
     print()
 
+    # Show player hands
     if players[0].statuses[0] != "Lost":
         for i in range(nPlayers):
             print(f"Player {i+1}'s hand:")
             printHand(players[i].hands[0])
 
             players[i].hand_values[0] = sum([card.value for card in players[i].hands[0]])
+
+            # Check for double aces and adjust hand value
+            if players[i].hand_values == 22:
+                bogoSort(players[i].hands[0])
+
+                if players[i].hands[0][len(players[i].hands[0]) - 1].value == 11:
+                    players[i].hands[0][len(players[i].hands[0]) - 1].value = 1
+                    players[i].hand_values[0] = sum([card.value for card in players[i].hands[0]])
+
             print(f"Value: {players[i].hand_values[0]}")
 
+            if players[i].hands[0][1].value == 1:
+                players[i].hands[0][1].value = 11
+
+            # Check for player blackjack
             if players[i].hand_values[0] == 21:
                 print(f"Blackjack! Player {i+1} wins.")
                 players[i].statuses[0] = "Blackjack"
                 players[i].bank += players[i].bet * 2.5
             
+            # Check for doubles
             if players[i].hands[0][0].value == players[i].hands[0][1].value:
                 players[i].hands.append("Split")
             print()
 
         input("Press enter to continue...")
 
+    # Standard hand play
     for i in range(nPlayers):
         clear()
         if players[i].statuses[0] == "Playing":
@@ -206,6 +224,7 @@ while running == True:
                 players[i].statuses[0] = "Split"
                 clear()
         
+        # Split hand play
         if players[i].statuses[0] == "Split":
             for j in range(2):
                 print(f"Player {i+1}'s {'first' if j == 0 else 'second'} hand:")
@@ -254,6 +273,7 @@ while running == True:
     print(f"Value: {dealer.hand_value}")
     input("Press enter to continue...")
 
+    # Dealer hand play
     while dealer.hand_value < 16:
         clear()
 
@@ -275,6 +295,7 @@ while running == True:
         for player in players:
             for i in range(len(player.statuses)):
                 player.statuses[i] = "Push" if player.statuses[i] == "Lost" else "Won"
+    # Final win/loss check
     else:
         for i in range(len([players[x].hands[y] for x in range(len(players)) for y in range(len(players[x].hands))])):
             if i < nPlayers and players[i].statuses[0] == "Done":
@@ -288,6 +309,7 @@ while running == True:
                 players[i].statuses[0] = "Won" if players[i].hand_values[0] > dealer.hand_value else "Push" if players[i].hand_values[0] == dealer.hand_value else "Lost"
                 print("Dealer wins" if players[i].statuses[0] == "Lost" else "Push" if players[i].statuses[0] == "Push" else f"Player {i+1} wins")
                 input("Press enter to continue...")
+            # Split hand win/loss check
             else:
                 if players[i].statuses[0] != "Lost":
                     clear()
