@@ -197,11 +197,13 @@ def playStandardHand(players, i):
         elif choice == 3 and players[i].hands[len(players[i].hands) - 1] == "Double Down":
             players[i].hands.remove("Double Down")
             players[i].hands[0].append(deck.draw())
+            players[i].statuses[0] = "Done"
             clear()
         
         elif choice == 4 and players[i].hands[len(players[i].hands) - 2] == "Double Down":
             players[i].hands.remove("Double Down")
             players[i].hands[0].append(deck.draw())
+            players[i].statuses[0] = "Done"
             clear()
 
 def playSplitHand(players, i):
