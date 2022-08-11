@@ -164,7 +164,11 @@ while running == True:
                 print(f"Blackjack! Player {i+1} wins.")
                 players[i].statuses[0] = "Blackjack"
                 players[i].bank += players[i].bet * 2.5
-            
+
+            # Check for double-down
+            if 9 <= players[i].hand_values[0] <= 11:
+                players[i].hands.append("Double Down")
+
             # Check for doubles
             if players[i].hands[0][0].value == players[i].hands[0][1].value:
                 players[i].hands.append("Split")
@@ -181,7 +185,7 @@ while running == True:
             print(f"Value: {players[i].hand_values[0]}")
 
         while players[i].statuses[0] == "Playing":
-            choice = int(input("1. Hit\n2. Stand\n" + ("3. Split\n" if len(players[i].hands) == 2 else "")))
+            choice = int(input("1. Hit\n2. Stand\n" + ("3. Split\n" if players[i].hands[len(players[i].hands - 1)] == "Split" else "") + ("4. Double Down\n" if ((players[i].hands[len(players[i].hands) - 1] == "Split") and (players[i].hands[len(players[i].hands) - 1] == "Double Down")) else "3. Double down" if players[i].hands[len(players[i].hands - 1)] == "Double Down" else "")))
             clear()
 
             if choice == 1:
@@ -213,7 +217,7 @@ while running == True:
             elif choice == 2:
                 players[i].statuses[0] = "Done"
             
-            elif choice == 3 and players[i].hands[2] == "Split":
+            elif choice == 3 and players[i].hands[len(players[i].hands) - 1] == "Split":
                 players[i].hands.remove("Split")
                 players[i].hands[0].remove(players[i].hands[0][0])
                 players[i].hands.append([players[i].hands[0][0]])
@@ -222,6 +226,16 @@ while running == True:
                 players[i].bet += players[i].bet
                 players[i].bank -= players[i].bet
                 players[i].statuses[0] = "Split"
+                clear()
+            
+            elif choice == 3 and players[i].hands[len(players[i].hands) - 1] == "Double Down":
+                players[i].hands.remove("Double Down")
+                players[i].hands[0].append(deck.draw())
+                clear()
+            
+            elif choice == 4 and players[i].hands[len(players[i].hands) - 2] == "Double Down":
+                players[i].hands.remove("Double Down")
+                players[i].hands[0].append(deck.draw())
                 clear()
         
         # Split hand play
