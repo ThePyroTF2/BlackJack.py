@@ -1,0 +1,40 @@
+body
+{
+    font-family: 'Quicksand', sans-serif;
+    overflow-wrap: break-word;
+    color: #00096e;
+}
+
+ul
+{
+    list-style-position: inside;
+}
+
+.left
+{
+    text-align: left;
+}
+
+.right
+{
+    text-align: right;
+}
+
+.center
+{
+    text-align: center;
+}
+
+.hollow
+{
+    list-style-type: circle;
+}
+
+.main
+{
+    background-color: #adadad;
+    border-radius: 10px;
+    padding: 1px;
+    margin-top: 10px;
+    margin-bottom: 10px;
+}
